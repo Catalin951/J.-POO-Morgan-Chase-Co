@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.checker.Checker;
 import org.poo.checker.CheckerConstants;
-import org.poo.commerciants.CommerciantType;
 import org.poo.exchange.Exchange;
 import org.poo.execution.Execute;
-import org.poo.fileio.CommerciantInput;
 import org.poo.fileio.ExchangeInput;
 import org.poo.fileio.ObjectInput;
 import org.poo.fileio.UserInput;
 import org.poo.userDetails.User;
+import org.poo.utils.Utils;
 
 import java.io.File;
 import java.io.IOException;
@@ -93,14 +92,10 @@ public final class Main {
         for (ExchangeInput exchangeInput : inputData.getExchangeRates()) {
             exchanges[exchangeIndex++] = new Exchange(exchangeInput);
         }
-//        CommerciantInput[] commerciants = inputData.getCommerciants();
-//        System.out.println(commerciants);
-//        CommerciantType[] commerciantTypes = new CommerciantType[inputData.getCommerciants()];
-
-
+        System.out.println(filePath1);
         Execute exec = new Execute(output, users, exchanges, inputData.getCommands());
-        exec.Execution();
-
+        exec.execution();
+        Utils.resetRandom();
 
 
         /*

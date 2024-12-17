@@ -7,4 +7,7 @@ public class ClassicCard extends Card {
     public ClassicCard(final String cardNumber) {
         super(cardNumber);
     }
+    public String getCardType() {
+        return "classic";
+    }
 }

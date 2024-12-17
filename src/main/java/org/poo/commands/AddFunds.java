@@ -24,6 +24,6 @@ public class AddFunds {
         if (account == null) {
             throw new IllegalArgumentException("Account not found");
         }
-        account.AddToBalance(input.getAmount());
+        account.addToBalance(input.getAmount());
     }
 }

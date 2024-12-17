@@ -1,7 +1,8 @@
 package org.poo.commands;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import org.poo.factories.AccountFactory;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
@@ -11,29 +12,36 @@ import org.poo.utils.Utils;
 public final class CreateCard implements Command {
     private final User[] users;
     private final CommandInput input;
-    private final ArrayNode output;
-    public CreateCard(CommandInput input, User[] users, ArrayNode output) {
+    public CreateCard(final CommandInput input, final User[] users) {
         this.users = users;
         this.input = input;
-        this.output = output;
     }
     public void execute() {
-        User requestedUser = null;
-        for (User user : users) {
-            if (user.getEmail().equals(input.getEmail())) {
-                requestedUser = user;
-            }
-        }
+        User requestedUser = Execute.searchUser(input.getEmail(), users);
 
         if (requestedUser == null) {
-            throw new RuntimeException("User not found");
+            System.out.println("user " + input.getEmail() + " not found for CreateCard");
+            return;
         }
 
         Account account = requestedUser.getAccount(input.getAccount());
+        ObjectNode objectNode = new ObjectMapper().createObjectNode();
+        objectNode.put("timestamp", input.getTimestamp());
         if (account == null) {
-            //add transaction that : Dacă utilizatorul nu este proprietarul contului, se va adăuga o tranzacție specifică care semnalează acest lucru.
+            objectNode.put("description", "User isn't owner");
+            requestedUser.getTransactions().add(objectNode);
             return;
         }
-        account.getCards().addFirst(new ClassicCard(Utils.generateCardNumber()));
+        String cardNumber = Utils.generateCardNumber();
+
+        objectNode.put("description", "new card created");
+        objectNode.put("card", cardNumber);
+        objectNode.put("cardHolder", requestedUser.getEmail());
+        objectNode.put("account", account.getIBAN());
+
+        requestedUser.getTransactions().add(objectNode);
+        account.getTransactions().add(objectNode);
+
+        account.getCards().addLast(new ClassicCard(cardNumber));
     }
 }

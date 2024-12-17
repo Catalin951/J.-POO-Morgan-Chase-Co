@@ -9,4 +9,7 @@ public class OneTimeCard extends Card {
     public OneTimeCard(final String cardNumber) {
         super(cardNumber);
     }
+    public String getCardType() {
+        return "OneTimeCard";
+    }
 }

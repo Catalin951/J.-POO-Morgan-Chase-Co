@@ -7,4 +7,7 @@ public class SavingsAccount extends Account {
         super(currency, IBAN);
         this.interestRate = interestRate;
     }
+    public String getAccountType() {
+        return "savings";
+    }
 }

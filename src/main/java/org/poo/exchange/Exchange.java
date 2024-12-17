@@ -1,7 +1,9 @@
 package org.poo.exchange;
 
+import lombok.Data;
 import org.poo.fileio.ExchangeInput;
 
+@Data
 public final class Exchange {
     private final String from;
     private final String to;
