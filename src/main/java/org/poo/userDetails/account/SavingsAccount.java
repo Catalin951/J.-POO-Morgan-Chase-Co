@@ -1,7 +1,7 @@
 package org.poo.userDetails.account;
 
-public class SavingsAccount extends Account {
-    private final double interestRate;
+public final class SavingsAccount extends Account {
+    private  double interestRate;
     public SavingsAccount(final String currency, final String IBAN,
                           final double interestRate) {
         super(currency, IBAN);
@@ -9,5 +9,8 @@ public class SavingsAccount extends Account {
     }
     public String getAccountType() {
         return "savings";
+    }
+    public void changeInterest(final double interestRate) {
+        this.interestRate = interestRate;
     }
 }

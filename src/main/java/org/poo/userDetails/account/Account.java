@@ -16,12 +16,14 @@ public abstract class Account {
     private final String IBAN;
     private final ArrayList<Card> cards = new ArrayList<>();
     private double balance;
+    private double minBalance;
     private ArrayNode transactions;
     public Account(final String currency, final String IBAN) {
         this.currency = currency;
         this.IBAN = IBAN;
         transactions = new ObjectMapper().createArrayNode();
         balance = 0;
+        minBalance = -1;
     }
     public void addToBalance(final double amount) {
         balance += amount;
@@ -30,4 +32,5 @@ public abstract class Account {
         balance -= amount;
     }
     public abstract String getAccountType();
+    public abstract void changeInterest(double interest);
 }

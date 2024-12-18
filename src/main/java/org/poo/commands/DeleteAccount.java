@@ -34,7 +34,7 @@ public final class DeleteAccount implements Command {
             if (account.getIBAN().equals(requestedIBAN)) {
                 requestedAccount = account;
                 if (requestedAccount.getBalance() != 0) {
-                   outputNode.put("fail", "Balance not 0");
+                   outputNode.put("error", "Account couldn't be deleted - see org.poo.transactions for details");
                    outputNode.put("timestamp", input.getTimestamp());
                    objectNode.set("output", outputNode);
                    objectNode.put("timestamp", input.getTimestamp());

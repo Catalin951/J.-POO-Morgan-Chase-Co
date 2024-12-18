@@ -4,26 +4,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
+import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
+import org.poo.userDetails.card.ClassicCard;
 import org.poo.userDetails.card.OneTimeCard;
 import org.poo.utils.Utils;
 
 public final class CreateOneTimeCard implements Command {
-    private final User[] users;
     private final CommandInput input;
-    public CreateOneTimeCard(final CommandInput input, final User[] users) {
-        this.users = users;
+    private final Mappers mappers;
+    public CreateOneTimeCard(final CommandInput input, final Mappers mappers) {
         this.input = input;
+        this.mappers = mappers;
     }
     public void execute() {
-        User requestedUser = Execute.searchUser(input.getEmail(), users);
+        User requestedUser = mappers.getUserForEmail(input.getEmail());
 
         if (requestedUser == null) {
-            throw new RuntimeException("User not found");
+            System.out.println("user " + input.getEmail() + " not found for CreateCard");
+            return;
         }
-
-        Account account = requestedUser.getAccount(input.getAccount());
+        Account account = mappers.getAccountForIban(input.getAccount());
         ObjectNode objectNode = new ObjectMapper().createObjectNode();
         objectNode.put("timestamp", input.getTimestamp());
         if (account == null) {
@@ -33,7 +35,7 @@ public final class CreateOneTimeCard implements Command {
         }
         String cardNumber = Utils.generateCardNumber();
 
-        objectNode.put("description", "new card created");
+        objectNode.put("description", "New card created");
         objectNode.put("card", cardNumber);
         objectNode.put("cardHolder", requestedUser.getEmail());
         objectNode.put("account", account.getIBAN());
@@ -41,6 +43,10 @@ public final class CreateOneTimeCard implements Command {
         requestedUser.getTransactions().add(objectNode);
         account.getTransactions().add(objectNode);
 
-        account.getCards().addLast(new OneTimeCard(cardNumber));
+        OneTimeCard newCard = new OneTimeCard(cardNumber);
+        account.getCards().addLast(newCard);
+
+        mappers.addCardToAccount(newCard, account);
+        mappers.addCardNumberToCard(cardNumber, newCard);
     }
 }

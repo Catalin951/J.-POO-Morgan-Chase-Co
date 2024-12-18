@@ -8,6 +8,7 @@ import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.*;
 import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
+import org.poo.graph.ExchangeGraph;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
@@ -18,9 +19,9 @@ public class PayOnline implements Command {
     private final User[] users;
     private final CommandInput input;
     private final ArrayNode output;
-    private final Graph<String, DefaultWeightedEdge> exchangeGraph;
+    private final ExchangeGraph exchangeGraph;
     public PayOnline(final CommandInput input, final User[] users,
-                     final Graph<String, DefaultWeightedEdge> exchangeGraph,
+                     final ExchangeGraph exchangeGraph,
                      ArrayNode output) {
         this.users = users;
         this.input = input;
@@ -56,44 +57,27 @@ public class PayOnline implements Command {
             output.add(objectNode);
             return;
         }
-
+        if (requestedCard.isFrozen()) {
+            ObjectNode errorNode = new ObjectMapper().createObjectNode();
+            errorNode.put("description", "The card is frozen");
+            errorNode.put("timestamp", input.getTimestamp());
+            requestedUser.getTransactions().add(errorNode);
+            return;
+        }
         String from = input.getCurrency();
         String to = requestedAccount.getCurrency();
-        double convertedAmount = convertCurrency(exchangeGraph, from, to, input.getAmount());
-
+        double convertedAmount = exchangeGraph.convertCurrency(from, to, input.getAmount());
         if (requestedAccount.getBalance() - convertedAmount < 0) {
-            System.out.println("Insufficient funds");
-            // TO CHECK HOW TO DO THIS
+            objectNode.put("timestamp", input.getTimestamp());
+            objectNode.put("description", "Insufficient funds");
+            requestedUser.getTransactions().add(objectNode);
         } else {
-            requestedAccount.subtractFromBalance(convertedAmount);
+            objectNode.put("timestamp", input.getTimestamp());
+            objectNode.put("description", "Card payment");
+            objectNode.put("amount", convertedAmount);
+            objectNode.put("commerciant", input.getCommerciant());
+            requestedUser.getTransactions().add(objectNode);
+            requestedCard.subtractFromBalance(convertedAmount, requestedAccount);
         }
-    }
-
-    public double convertCurrency(Graph<String, DefaultWeightedEdge> graph, String fromCurrency, String toCurrency, double amount) {
-        DijkstraShortestPath<String, DefaultWeightedEdge> dijkstra = new DijkstraShortestPath<>(graph);
-        GraphPath<String, DefaultWeightedEdge> path = dijkstra.getPath(fromCurrency, toCurrency);
-
-        // Step 2: Check if a path exists
-        if (path == null) {
-            System.out.println("No conversion path exists between " + fromCurrency + " and " + toCurrency);
-            return -1;
-        }
-
-        // Step 3: Calculate the total exchange rate (product of weights on the path)
-        double totalRate = 1.0;
-        for (DefaultWeightedEdge edge : path.getEdgeList()) {
-            double weight = graph.getEdgeWeight(edge);
-            totalRate *= weight;
-        }
-
-        // Step 4: Perform the conversion
-        double convertedAmount = amount * totalRate;
-
-        // Output for debugging
-        System.out.println("Path from " + fromCurrency + " to " + toCurrency + ": " + path.getVertexList());
-        System.out.println("Total Rate: " + totalRate);
-        System.out.println("Converted Amount: " + convertedAmount);
-
-        return convertedAmount;
     }
 }

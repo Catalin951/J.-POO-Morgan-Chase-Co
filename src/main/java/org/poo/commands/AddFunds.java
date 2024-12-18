@@ -1,29 +1,24 @@
 package org.poo.commands;
 
 import org.poo.fileio.CommandInput;
+import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 
 public class AddFunds {
-    private final User[] users;
     private final CommandInput input;
-    public AddFunds(final CommandInput input, final User[] users) {
-        this.users = users;
+    private final Mappers mappers;
+    public AddFunds(final CommandInput input, final Mappers mappers) {
         this.input = input;
+        this.mappers = mappers;
     }
     public void execute() {
-        String IBAN = input.getAccount();
-        Account account = null;
-        for (User user : users) {
-            Account accountIteration = user.getAccount(IBAN);
-            if (accountIteration != null) {
-                account = accountIteration;
-                break;
-            }
-        }
+        Account account = mappers.getAccountForIban(input.getAccount());
+
         if (account == null) {
             throw new IllegalArgumentException("Account not found");
         }
+
         account.addToBalance(input.getAmount());
     }
 }

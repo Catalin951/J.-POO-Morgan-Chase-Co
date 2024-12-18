@@ -9,11 +9,14 @@ import org.poo.commerciants.CommerciantType;
 import org.poo.exchange.Exchange;
 import org.poo.factories.AccountFactory;
 import org.poo.fileio.CommandInput;
+import org.poo.graph.ExchangeGraph;
+import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public final class Execute {
     private final ArrayNode output;
@@ -31,40 +34,30 @@ public final class Execute {
     }
 
     public void execution() {
-        Graph<String, DefaultWeightedEdge> exchangeGraph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
-
-        for (Exchange exchange : exchanges) {
-            String from = exchange.getFrom();
-            String to = exchange.getTo();
-            double rate = exchange.getRate();
-
-            exchangeGraph.addVertex(from);
-            exchangeGraph.addVertex(to);
-            DefaultWeightedEdge edge = exchangeGraph.addEdge(from, to);
-            if (edge != null) {
-                exchangeGraph.setEdgeWeight(edge, rate);
-            }
-            DefaultWeightedEdge reverseEdge = exchangeGraph.addEdge(to, from);
-            if (reverseEdge != null) {
-                exchangeGraph.setEdgeWeight(reverseEdge, 1.0 / rate);
-            }
+        ExchangeGraph exchangeGraph = new ExchangeGraph(exchanges);
+        Mappers mappers = new Mappers();
+        for (User user : users) {
+            mappers.addEmailToUser(user.getEmail(), user);
         }
         for (CommandInput command : commands) {
             switch (command.getCommand()) {
                 case "printUsers":
                     new PrintUsers(command, users, output).execute();
                     break;
+                case "printTransactions":
+                    new PrintTransactions(command, users, output).execute();
+                    break;
                 case "addAccount":
-                    new AddAccount(command, users).execute();
+                    new AddAccount(command, mappers).execute();
                     break;
                 case "addFunds":
-                    new AddFunds(command, users).execute();
+                    new AddFunds(command, mappers).execute();
                     break;
                 case "createCard":
-                    new CreateCard(command, users).execute();
+                    new CreateCard(command, mappers).execute();
                     break;
                 case "createOneTimeCard":
-                    new CreateOneTimeCard(command, users).execute();
+                    new CreateOneTimeCard(command, mappers).execute();
                     break;
                 case "deleteAccount":
                     new DeleteAccount(command, users, output).execute();
@@ -74,6 +67,25 @@ public final class Execute {
                     break;
                 case "payOnline":
                     new PayOnline(command, users, exchangeGraph, output).execute();
+                    break;
+                case "sendMoney":
+                    new SendMoney(command, users, exchangeGraph, output).execute();
+                    break;
+                case "setAlias":
+                    new SetAlias(command, users).execute();
+                    break;
+                case "setMinimumBalance":
+                    new SetMinBalance(command, users, output).execute();
+                    break;
+                case "checkCardStatus":
+                    new CheckCardStatus(command, users, output).execute();
+                    break;
+                case "changeInterestRate":
+                    new ChangeInterestRate(command, users, output).execute();
+                    break;
+                case "splitPayment":
+                    new SplitPayment(command, users, exchangeGraph, output, mappers).execute();
+                    break;
                 default:
                     break;
             }
@@ -111,7 +123,5 @@ public final class Execute {
         }
         return null;
     }
-
-
 }
 

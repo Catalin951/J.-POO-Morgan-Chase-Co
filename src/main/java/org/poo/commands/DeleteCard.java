@@ -29,7 +29,9 @@ public final class DeleteCard implements Command {
                         objectNode.put("cardHolder", user.getEmail());
                         objectNode.put("account", account.getIBAN());
                         account.getCards().remove(i);
-                        account.getTransactions().add(objectNode);
+                        // CHECK IF ONE NEEDED OR BOTH
+//                        account.getTransactions().add(objectNode);
+                        user.getTransactions().add(objectNode);
                         return;
                     }
                     i++;
