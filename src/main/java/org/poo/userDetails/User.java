@@ -4,12 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.poo.fileio.UserInput;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.poo.userDetails.account.Account;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+/**
+ * This class is where all the information about an user is held
+ * It contains an alias map that maps an alias to an account
+ */
 @Data
 public final class User {
     private final String firstName;
@@ -28,20 +31,21 @@ public final class User {
         aliasMap = new HashMap<>();
     }
 
-    public void setAlias(String alias, Account account) {
+    /**
+     * Maps the alias to an account
+     * @param alias Key
+     * @param account Value
+     */
+    public void setAlias(final String alias, final Account account) {
         aliasMap.put(alias, account);
     }
 
-    public Account getAccountFromAlias(String alias) {
+    /**
+     * Returns the value to which the alias is mapped
+     * @param alias key
+     * @return Value
+     */
+    public Account getAccountFromAlias(final String alias) {
         return aliasMap.get(alias);
-    }
-
-    public Account getAccount(final String IBAN) {
-        for (Account account : accounts) {
-            if (account.getIBAN().equals(IBAN)) {
-                return account;
-            }
-        }
-        return null;
     }
 }

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.commands.Command;
-import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
 import org.poo.mapper.Mappers;
@@ -12,25 +11,28 @@ import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
 
-public class PayOnline implements Command {
-    private final User[] users;
+public final class PayOnline implements Command {
     private final CommandInput input;
     private final ArrayNode output;
     private final ExchangeGraph exchangeGraph;
     private final Mappers mappers;
-    public PayOnline(final CommandInput input, final User[] users,
-                     final ExchangeGraph exchangeGraph,
-                     final ArrayNode output,
-                     final Mappers mappers) {
-        this.users = users;
+    public PayOnline(final CommandInput input, final ExchangeGraph exchangeGraph,
+                     final ArrayNode output, final Mappers mappers) {
         this.input = input;
         this.exchangeGraph = exchangeGraph;
         this.output = output;
         this.mappers = mappers;
     }
 
+    /**
+     * This command returns an error if the given used isn't found
+     * Outputs an error if the requested card isn't found
+     * Uses the exchangeGraph to find a path between the currencies and checks
+     * if the account has enough money
+     * The transactions are placed in the account and in the user
+     */
     public void execute() {
-        User requestedUser = Execute.searchUser(input.getEmail(), users);
+        User requestedUser = mappers.getUserForEmail(input.getEmail());
         if (requestedUser == null) {
             throw new IllegalArgumentException("User " + input.getEmail() + " not found");
         }
@@ -78,7 +80,8 @@ public class PayOnline implements Command {
             objectNode.put("commerciant", input.getCommerciant());
             requestedUser.getTransactions().add(objectNode);
             requestedAccount.getTransactions().add(objectNode);
-            requestedCard.subtractFromBalance(convertedAmount, requestedAccount, mappers, input.getTimestamp());
+            requestedCard.subtractFromBalance(convertedAmount, requestedAccount,
+                                              mappers, input.getTimestamp());
         }
     }
 }

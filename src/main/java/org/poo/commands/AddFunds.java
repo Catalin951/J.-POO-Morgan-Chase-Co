@@ -2,10 +2,9 @@ package org.poo.commands;
 
 import org.poo.fileio.CommandInput;
 import org.poo.mapper.Mappers;
-import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 
-public class AddFunds {
+public final class AddFunds {
     private final CommandInput input;
     private final Mappers mappers;
     public AddFunds(final CommandInput input, final Mappers mappers) {

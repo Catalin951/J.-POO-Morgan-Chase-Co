@@ -1,15 +1,13 @@
 package org.poo.commands.interest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
 import org.poo.mapper.Mappers;
 import org.poo.userDetails.account.Account;
 
 public final class AddInterest {
-    private CommandInput input;
+    private final CommandInput input;
     private final Mappers mappers;
     private final ArrayNode output;
     public AddInterest(final CommandInput input, final ArrayNode output, final Mappers mappers) {
@@ -19,8 +17,6 @@ public final class AddInterest {
     }
     public void execute() {
         Account account = mappers.getAccountForIban(input.getAccount());
-        // CHANGE POLIMORPHISM, ADD A METHOD THAT DOES IN CLASSIC RETURN ERROR
-        // AND IN THE OTHER (SAVINGS) IT ACTUALLY DOES IT, CHECK ELSEWHERE THIS MIGHT APPLY TO
         if (account == null) {
             output.add(Execute.makeGeneralError("addInterest",
                     "Account not found",

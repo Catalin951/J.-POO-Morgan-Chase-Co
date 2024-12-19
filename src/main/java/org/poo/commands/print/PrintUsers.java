@@ -9,7 +9,7 @@ import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
 
-public class PrintUsers implements Command {
+public final class PrintUsers implements Command {
     private final CommandInput input;
     private final User[] users;
     private final ArrayNode output;
@@ -32,7 +32,7 @@ public class PrintUsers implements Command {
             ArrayNode accountsArray = mapper.createArrayNode();
             for (Account account : user.getAccounts()) {
                 ObjectNode accountNode = mapper.createObjectNode();
-                accountNode.put("IBAN", account.getIBAN());
+                accountNode.put("IBAN", account.getIban());
                 accountNode.put("balance", account.getBalance());
                 accountNode.put("currency", account.getCurrency());
                 accountNode.put("type", account.getAccountType());

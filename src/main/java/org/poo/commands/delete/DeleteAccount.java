@@ -14,7 +14,7 @@ public final class DeleteAccount implements Command {
     private final CommandInput input;
     private final ArrayNode output;
     private final Mappers mappers;
-    public DeleteAccount(final CommandInput input, final ArrayNode output, Mappers mappers) {
+    public DeleteAccount(final CommandInput input, final ArrayNode output, final Mappers mappers) {
         this.input = input;
         this.output = output;
         this.mappers = mappers;

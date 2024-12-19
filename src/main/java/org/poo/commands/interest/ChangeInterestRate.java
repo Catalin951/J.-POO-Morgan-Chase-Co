@@ -7,7 +7,6 @@ import org.poo.commands.Command;
 import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
 import org.poo.mapper.Mappers;
-import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 
 public final class ChangeInterestRate implements Command {
@@ -30,15 +29,16 @@ public final class ChangeInterestRate implements Command {
                     input.getTimestamp()));
             return;
         }
-        String Type = requestedAccount.getAccountType();
-        if (Type.equals("classic")) {
+        String type = requestedAccount.getAccountType();
+        if (type.equals("classic")) {
             output.add(Execute.makeGeneralError("changeInterestRate",
                     "This is not a savings account",
                     input.getTimestamp()));
             return;
         }
         ObjectNode objectNode = new ObjectMapper().createObjectNode();
-        objectNode.put("description", "Interest rate of the account changed to " + input.getInterestRate());
+        objectNode.put("description",
+                "Interest rate of the account changed to " + input.getInterestRate());
         objectNode.put("timestamp", input.getTimestamp());
         requestedAccount.getTransactions().add(objectNode);
         mapper.getUserForAccount(requestedAccount).getTransactions().add(objectNode);

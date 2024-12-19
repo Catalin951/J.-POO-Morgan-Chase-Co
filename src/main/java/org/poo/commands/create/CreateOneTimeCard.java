@@ -37,15 +37,12 @@ public final class CreateOneTimeCard implements Command {
         objectNode.put("description", "New card created");
         objectNode.put("card", cardNumber);
         objectNode.put("cardHolder", requestedUser.getEmail());
-        objectNode.put("account", account.getIBAN());
+        objectNode.put("account", account.getIban());
 
         requestedUser.getTransactions().add(objectNode);
         account.getTransactions().add(objectNode);
 
         OneTimeCard newCard = new OneTimeCard(cardNumber);
         account.getCards().addLast(newCard);
-
-        mappers.addCardToAccount(newCard, account);
-        mappers.addCardNumberToCard(cardNumber, newCard);
     }
 }

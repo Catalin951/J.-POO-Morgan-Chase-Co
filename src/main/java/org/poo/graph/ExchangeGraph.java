@@ -7,8 +7,10 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.poo.exchange.Exchange;
 
-public class ExchangeGraph {
-    private static ExchangeGraph instance;
+/**
+ * This class uses a directed weighted graph in which the nodes are the inputted currencies
+ */
+public final class ExchangeGraph {
     private final Graph<String, DefaultWeightedEdge> exchangeGraph;
 
     public ExchangeGraph(final Exchange[] exchanges) {
@@ -30,12 +32,23 @@ public class ExchangeGraph {
         }
     }
 
-    public double convertCurrency(String fromCurrency, String toCurrency, double amount) {
-        DijkstraShortestPath<String, DefaultWeightedEdge> dijkstra = new DijkstraShortestPath<>(exchangeGraph);
+    /**
+     * Uses Dijkstra's algorithm to compute a path from the begging node to the end node
+     * and returns the sequentially calculated converted currency
+     * @param fromCurrency The currency from that gets converted
+     * @param toCurrency The currency that gets converted to
+     * @param amount The amount of the currency
+     * @return Converted currency
+     */
+    public double convertCurrency(final String fromCurrency, final String toCurrency,
+                                  final double amount) {
+        DijkstraShortestPath<String, DefaultWeightedEdge> dijkstra
+                = new DijkstraShortestPath<>(exchangeGraph);
         GraphPath<String, DefaultWeightedEdge> path = dijkstra.getPath(fromCurrency, toCurrency);
 
         if (path == null) {
-            throw new IllegalArgumentException("No path found for " + fromCurrency + " and " + toCurrency);
+            throw new IllegalArgumentException("No path found for " + fromCurrency
+                                               + " and " + toCurrency);
         }
 
         double totalRate = 1.0;
@@ -44,10 +57,5 @@ public class ExchangeGraph {
             totalRate *= weight;
         }
         return amount * totalRate;
-    }
-
-    public void printGraph() {
-        System.out.println("Graph Vertices: " + exchangeGraph.vertexSet());
-        System.out.println("Graph Edges: " + exchangeGraph.edgeSet());
     }
 }

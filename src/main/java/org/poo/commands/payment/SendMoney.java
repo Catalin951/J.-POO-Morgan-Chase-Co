@@ -1,7 +1,6 @@
 package org.poo.commands.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.commands.Command;
 import org.poo.fileio.CommandInput;
@@ -9,32 +8,33 @@ import org.poo.graph.ExchangeGraph;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 
-public class SendMoney implements Command {
+public final class SendMoney implements Command {
     private final User[] users;
     private final CommandInput input;
-    private final ArrayNode output;
     private final ExchangeGraph exchangeGraph;
     public SendMoney(final CommandInput input, final User[] users,
-                     final ExchangeGraph exchangeGraph,
-                     ArrayNode output) {
+                     final ExchangeGraph exchangeGraph) {
         this.users = users;
         this.input = input;
         this.exchangeGraph = exchangeGraph;
-        this.output = output;
     }
+
+    /**
+     * Uses the exchangeGraph to find a path between the currencies and checks
+     * if the account has enough money
+     * The transactions are placed in the account and in the user object of both
+     * the payer and the receiver
+     */
     public void execute() {
         User payer = null;
         Account payerAccount = null;
         for (User user : users) {
             for (Account account : user.getAccounts()) {
-                if (account.getIBAN().equals(input.getAccount())) {
+                if (account.getIban().equals(input.getAccount())) {
                     payer = user;
                     payerAccount = account;
                     break;
                 }
-            }
-            if (payer != null) {
-                break;
             }
         }
 
@@ -48,18 +48,14 @@ public class SendMoney implements Command {
                 break;
             }
             for (Account account : user.getAccounts()) {
-                if (account.getIBAN().equals(input.getReceiver())) {
+                if (account.getIban().equals(input.getReceiver())) {
                     receiver = user;
                     receiverAccount = account;
                     break;
                 }
             }
-            if (receiver != null) {
-                break;
-            }
         }
         if (payer == null || receiver == null) {
-            System.out.println("the account " + input.getAccount() + " not found SENDMONEY" + input.getTimestamp());
             return;
         }
         String from = payerAccount.getCurrency();
@@ -77,8 +73,8 @@ public class SendMoney implements Command {
         } else {
             objectNode.put("timestamp", input.getTimestamp());
             objectNode.put("description", input.getDescription());
-            objectNode.put("senderIBAN", payerAccount.getIBAN());
-            objectNode.put("receiverIBAN", receiverAccount.getIBAN());
+            objectNode.put("senderIBAN", payerAccount.getIban());
+            objectNode.put("receiverIBAN", receiverAccount.getIban());
             objectNode.put("amount", input.getAmount() + " " + from);
             objectNode.put("transferType", "sent");
             payer.getTransactions().add(objectNode);

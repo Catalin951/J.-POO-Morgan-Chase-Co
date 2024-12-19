@@ -10,39 +10,35 @@ import org.poo.fileio.CommandInput;
 import org.poo.mapper.Mappers;
 import org.poo.userDetails.account.Account;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class SpendingsReport implements Command {
+public final class SpendingsReport implements Command {
     private final Mappers mappers;
     private final CommandInput input;
     private final ArrayNode output;
     private final int startTimestamp;
     private final int endTimestamp;
 
-    public SpendingsReport(final CommandInput input, final ArrayNode output, final Mappers mappers) {
+    public SpendingsReport(final CommandInput input, final ArrayNode output,
+                           final Mappers mappers) {
         this.mappers = mappers;
         this.input = input;
         this.output = output;
         startTimestamp = input.getStartTimestamp();
         endTimestamp = input.getEndTimestamp();
     }
-    private final class CommerciantPayments {
+    private static final class CommerciantPayments {
         private final TreeMap<String, Double> commerciantPayments;
 
-        public CommerciantPayments() {
+        CommerciantPayments() {
             this.commerciantPayments = new TreeMap<>();
         }
 
-        public void addPayment(String commerciant, Double amount) {
+        public void addPayment(final String commerciant, final Double amount) {
             Double currentAmount = commerciantPayments.getOrDefault(commerciant, 0.0);
             Double updatedAmount = currentAmount + amount;
             commerciantPayments.put(commerciant, updatedAmount);
-        }
-
-        public Double getAmountPaid(String commerciant) {
-            return commerciantPayments.getOrDefault(commerciant, 0.0);
         }
     }
 
@@ -71,25 +67,23 @@ public class SpendingsReport implements Command {
         objectNode.put("command", "spendingsReport");
 
         ObjectNode outputNode = mapper.createObjectNode();
-        outputNode.put("IBAN", account.getIBAN());
+        outputNode.put("IBAN", account.getIban());
         outputNode.put("balance", account.getBalance());
         outputNode.put("currency", account.getCurrency());
 
         ArrayNode transactionsArrayNode = mapper.createArrayNode();
         ArrayNode commerciantsArrayNode = mapper.createArrayNode();
-        
         this.makeTransactionsAndCommerciants(transactionsArrayNode, commerciantsArrayNode,
                                              transactions);
-        
         outputNode.set("transactions", transactionsArrayNode);
         outputNode.set("commerciants", commerciantsArrayNode);
         objectNode.set("output", outputNode);
         objectNode.put("timestamp", input.getTimestamp());
         output.add(objectNode);
     }
-    private void makeTransactionsAndCommerciants(ArrayNode transactionsArrayNode,
-                                                 ArrayNode commerciantsArrayNode,
-                                                 ArrayNode transactions) {
+    private void makeTransactionsAndCommerciants(final ArrayNode transactionsArrayNode,
+                                                 final ArrayNode commerciantsArrayNode,
+                                                 final ArrayNode transactions) {
         CommerciantPayments commerciantPayments = new CommerciantPayments();
         for (JsonNode transaction : transactions) {
             if (!transaction.isObject()) {

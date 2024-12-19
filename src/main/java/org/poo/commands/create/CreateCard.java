@@ -21,7 +21,6 @@ public final class CreateCard implements Command {
         User requestedUser = mappers.getUserForEmail(input.getEmail());
 
         if (requestedUser == null) {
-            System.out.println("user " + input.getEmail() + " not found for CreateCard");
             return;
         }
         Account account = mappers.getAccountForIban(input.getAccount());
@@ -37,15 +36,12 @@ public final class CreateCard implements Command {
         objectNode.put("description", "New card created");
         objectNode.put("card", cardNumber);
         objectNode.put("cardHolder", requestedUser.getEmail());
-        objectNode.put("account", account.getIBAN());
+        objectNode.put("account", account.getIban());
 
         requestedUser.getTransactions().add(objectNode);
         account.getTransactions().add(objectNode);
 
         ClassicCard newCard = new ClassicCard(cardNumber);
         account.getCards().addLast(newCard);
-
-        mappers.addCardToAccount(newCard, account);
-        mappers.addCardNumberToCard(cardNumber, newCard);
     }
 }

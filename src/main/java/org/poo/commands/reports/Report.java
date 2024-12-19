@@ -39,7 +39,7 @@ public final class Report implements Command {
         objectNode.put("command", "report");
 
         ObjectNode outputNode = mapper.createObjectNode();
-        outputNode.put("IBAN", account.getIBAN());
+        outputNode.put("IBAN", account.getIban());
         outputNode.put("balance", account.getBalance());
         outputNode.put("currency", account.getCurrency());
 
@@ -47,8 +47,7 @@ public final class Report implements Command {
 
         if (account.getAccountType().equals("Savings")) {
             this.makeTransactionsSavings(transactionsArrayNode, transactions);
-        }
-        else {
+        } else {
             this.makeTransactionsClassic(transactionsArrayNode, transactions);
         }
         outputNode.set("transactions", transactionsArrayNode);

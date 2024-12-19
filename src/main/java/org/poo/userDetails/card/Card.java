@@ -15,7 +15,8 @@ public abstract class Card {
         this.status = "active";
         isFrozen = false;
     }
-    public abstract void subtractFromBalance(final double amount, final Account ownerAccount,
-                                             final Mappers mappers, final int timestamp);
-    public abstract String getCardType();
+    public Card() {
+    }
+    public abstract void subtractFromBalance(double amount, Account ownerAccount,
+                                             Mappers mappers, int timestamp);
 }

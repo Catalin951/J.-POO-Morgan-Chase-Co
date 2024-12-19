@@ -3,11 +3,11 @@ package org.poo.execution;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.poo.commands.*;
 import org.poo.commands.create.CreateCard;
 import org.poo.commands.create.CreateOneTimeCard;
 import org.poo.commands.delete.DeleteAccount;
 import org.poo.commands.delete.DeleteCard;
+import org.poo.commands.CheckCardStatus;
 import org.poo.commands.interest.AddInterest;
 import org.poo.commands.interest.ChangeInterestRate;
 import org.poo.commands.payment.PayOnline;
@@ -15,33 +15,39 @@ import org.poo.commands.payment.SendMoney;
 import org.poo.commands.payment.SplitPayment;
 import org.poo.commands.print.PrintTransactions;
 import org.poo.commands.print.PrintUsers;
-import org.poo.commands.SetAlias;
 import org.poo.commands.reports.Report;
 import org.poo.commands.reports.SpendingsReport;
-import org.poo.commerciants.CommerciantType;
 import org.poo.exchange.Exchange;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
+import org.poo.commands.AddAccount;
+import org.poo.commands.AddFunds;
+import org.poo.commands.SetAlias;
+import org.poo.commands.SetMinBalance;
 import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
-import org.poo.userDetails.account.Account;
-import org.poo.userDetails.card.Card;
 
-import java.util.ArrayList;
-
+/**
+ * This class Launches all the commands, initialises the HashMaps used in most commands,
+ * initialises the exchangeGraph used to convert currencies
+ */
 public final class Execute {
     private final ArrayNode output;
     private final User[] users;
     private final Exchange[] exchanges;
     private final CommandInput[] commands;
 
-    public Execute(final ArrayNode output, final User[] users, final Exchange[] exchanges, final CommandInput[] commands) {
+    public Execute(final ArrayNode output, final User[] users,
+                   final Exchange[] exchanges, final CommandInput[] commands) {
         this.output = output;
         this.users = users;
         this.exchanges = exchanges;
         this.commands = commands;
     }
 
+    /**
+     * The method that does the initialisation and executes the commands
+     */
     public void execution() {
         ExchangeGraph exchangeGraph = new ExchangeGraph(exchanges);
         Mappers mappers = new Mappers();
@@ -54,7 +60,7 @@ public final class Execute {
                     new PrintUsers(command, users, output).execute();
                     break;
                 case "printTransactions":
-                    new PrintTransactions(command, users, output).execute();
+                    new PrintTransactions(command, mappers, output).execute();
                     break;
                 case "addAccount":
                     new AddAccount(command, mappers).execute();
@@ -72,19 +78,19 @@ public final class Execute {
                     new DeleteAccount(command, output, mappers).execute();
                     break;
                 case "deleteCard":
-                    new DeleteCard(command, users, mappers).execute();
+                    new DeleteCard(command, users).execute();
                     break;
                 case "payOnline":
-                    new PayOnline(command, users, exchangeGraph, output, mappers).execute();
+                    new PayOnline(command, exchangeGraph, output, mappers).execute();
                     break;
                 case "sendMoney":
-                    new SendMoney(command, users, exchangeGraph, output).execute();
+                    new SendMoney(command, users, exchangeGraph).execute();
                     break;
                 case "setAlias":
-                    new SetAlias(command, users).execute();
+                    new SetAlias(command, mappers).execute();
                     break;
                 case "setMinimumBalance":
-                    new SetMinBalance(command, users, output).execute();
+                    new SetMinBalance(command, output, mappers).execute();
                     break;
                 case "checkCardStatus":
                     new CheckCardStatus(command, users, output).execute();
@@ -93,7 +99,7 @@ public final class Execute {
                     new ChangeInterestRate(command, mappers, output).execute();
                     break;
                 case "splitPayment":
-                    new SplitPayment(command, users, exchangeGraph, output, mappers).execute();
+                    new SplitPayment(command, exchangeGraph, mappers).execute();
                     break;
                 case "addInterest":
                     new AddInterest(command, output, mappers).execute();
@@ -105,11 +111,22 @@ public final class Execute {
                     new SpendingsReport(command, output, mappers).execute();
                     break;
                 default:
-                    break;
+                    throw new IllegalArgumentException("Command doesn't exist.");
             }
         }
     }
-    public static ObjectNode makeGeneralError(String command, String description, int timestamp) {
+
+    /**
+     * This method is used around the program to quickly make an ObjectNode that describes an error
+     * Since there are no standard errors this is the only method of this type,
+     * because it is being used the most often
+     * @param command The command that is put inside the object
+     * @param description The description that is put inside the object
+     * @param timestamp The timestamp that is put inside the object
+     * @return ObjectNode that represents an error
+     */
+    public static ObjectNode makeGeneralError(final String command, final String description,
+                                              final int timestamp) {
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode outputNode = mapper.createObjectNode();
         outputNode.put("description", description);
@@ -119,38 +136,6 @@ public final class Execute {
         errorNode.set("output", outputNode);
         errorNode.put("timestamp", timestamp);
         return errorNode;
-    }
-    public static User searchUser(final String email, final User[] users) {
-        User requestedUser = null;
-        for (User user : users) {
-            if (user.getEmail().equals(email)) {
-                requestedUser = user;
-            }
-        }
-        return requestedUser;
-    }
-
-    public static Account searchAccount(final String IBAN, final ArrayList<Account> accounts) {
-        Account requestedAccount = null;
-        for (Account account : accounts) {
-            if (account.getIBAN().equals(IBAN)) {
-                requestedAccount = account;
-            }
-        }
-        return requestedAccount;
-    }
-
-    public static Account searchAccountWithCard(final String cardNumber, final User[] users) {
-        for (User user : users) {
-            for (Account account : user.getAccounts()) {
-                for (Card card : account.getCards()) {
-                    if (card.getCardNumber().equals(cardNumber)) {
-                       return account;
-                    }
-                }
-            }
-        }
-        return null;
     }
 }
 

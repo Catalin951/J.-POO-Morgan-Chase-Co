@@ -8,7 +8,7 @@ import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
 
-public final class CheckCardStatus implements Command{
+public final class CheckCardStatus implements Command {
     private final User[] users;
     private final CommandInput input;
     private final ArrayNode output;
@@ -51,7 +51,8 @@ public final class CheckCardStatus implements Command{
             requestedCard.setFrozen(true);
             requestedCard.setStatus("frozen");
             ObjectNode objectNode = mapper.createObjectNode();
-            objectNode.put("description", "You have reached the minimum amount of funds, the card will be frozen");
+            objectNode.put("description",
+                    "You have reached the minimum amount of funds, the card will be frozen");
             objectNode.put("timestamp", input.getTimestamp());
             requestedUser.getTransactions().add(objectNode);
         }

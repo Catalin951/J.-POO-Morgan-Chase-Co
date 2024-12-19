@@ -2,97 +2,78 @@ package org.poo.mapper;
 
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
-import org.poo.userDetails.card.Card;
 
 import java.util.HashMap;
 
-public class Mappers {
+/**
+ * Mappers uses 3 HashMaps to store information so it can be accessed
+ * Its utility stems from the different Maps that are all in one object:
+ * account -> user
+ * email -> user
+ * iban -> account
+ */
+public final class Mappers {
     private final HashMap<Account, User> accountToUserMap;
     private final HashMap<String, User> emailToUserMap;
     private final HashMap<String, Account> ibanToAccountMap;
-    private final HashMap<Card, Account> cardToAccountMap;
-    private final HashMap<String, Card> cardNumberToCardMap;
 
     public Mappers() {
         this.accountToUserMap = new HashMap<>();
         this.emailToUserMap = new HashMap<>();
         this.ibanToAccountMap = new HashMap<>();
-        this.cardToAccountMap = new HashMap<>();
-        this.cardNumberToCardMap = new HashMap<>();
     }
-
-    // Account -> User mapping
-    public void addAccountToUser(Account account, User user) {
+    /**
+     * Maps the given account to an user
+     * @param account Key
+     * @param user Value
+     */
+    public void addAccountToUser(final Account account, final User user) {
         if (account != null && user != null) {
             accountToUserMap.put(account, user);
         }
     }
-
-    public User getUserForAccount(Account account) {
-        return accountToUserMap.get(account); // Returns null if not found
+    /**
+     * Returns the user that the account is mapped to
+     * @param account Key
+     * @return The value which is the corresponding user
+     */
+    public User getUserForAccount(final Account account) {
+        return accountToUserMap.get(account);
     }
-
-    public boolean containsAccount(Account account) {
-        return accountToUserMap.containsKey(account);
-    }
-
-    // Email -> User mapping
-    public void addEmailToUser(String email, User user) {
+    /**
+     * Maps the given email to an user
+     * @param email Key
+     * @param user Value
+     */
+    public void addEmailToUser(final String email, final User user) {
         if (email != null && user != null) {
             emailToUserMap.put(email, user);
         }
     }
-
-    public User getUserForEmail(String email) {
-        return emailToUserMap.get(email); // Returns null if not found
+    /**
+     * Returns the user that the email is mapped to
+     * @param email Key
+     * @return The value which is the corresponding user
+     */
+    public User getUserForEmail(final String email) {
+        return emailToUserMap.get(email);
     }
-
-    public boolean containsEmail(String email) {
-        return emailToUserMap.containsKey(email);
-    }
-
-    // IBAN -> Account mapping
-    public void addIbanToAccount(String iban, Account account) {
+    /**
+     * Maps the given iban to an account
+     * @param iban Key
+     * @param account Value
+     */
+    public void addIbanToAccount(final String iban, final Account account) {
         if (iban != null && account != null) {
             ibanToAccountMap.put(iban, account);
         }
     }
-
-    public Account getAccountForIban(String iban) {
-        return ibanToAccountMap.get(iban); // Returns null if not found
-    }
-
-    public boolean containsIban(String iban) {
-        return ibanToAccountMap.containsKey(iban);
-    }
-
-    // Card -> Account mapping
-    public void addCardToAccount(Card card, Account account) {
-        if (card != null && account != null) {
-            cardToAccountMap.put(card, account);
-        }
-    }
-
-    public Account getAccountForCard(Card card) {
-        return cardToAccountMap.get(card); // Returns null if not found
-    }
-
-    public boolean containsCard(Card card) {
-        return cardToAccountMap.containsKey(card);
-    }
-
-    // CardNumber -> Card mapping
-    public void addCardNumberToCard(String cardNumber, Card card) {
-        if (cardNumber != null && card != null) {
-            cardNumberToCardMap.put(cardNumber, card);
-        }
-    }
-
-    public Card getCardForCardNumber(String cardNumber) {
-        return cardNumberToCardMap.get(cardNumber); // Returns null if not found
-    }
-
-    public boolean containsCardNumber(String cardNumber) {
-        return cardNumberToCardMap.containsKey(cardNumber);
+    /**
+     * Returns the account that the iban is mapped to
+     * @param iban Key
+     * @return The value which is the corresponding account
+     */
+    public Account getAccountForIban(final String iban) {
+        return ibanToAccountMap.get(iban);
     }
 }

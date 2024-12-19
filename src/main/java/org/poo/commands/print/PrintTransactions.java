@@ -4,21 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.commands.Command;
-import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
+import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 
-public class PrintTransactions implements Command {
-    private final User[] users;
+public final class PrintTransactions implements Command {
+    private final Mappers mappers;
     private final CommandInput input;
     private final ArrayNode output;
-    public PrintTransactions(final CommandInput input, final User[] users, ArrayNode output) {
-        this.users = users;
+    public PrintTransactions(final CommandInput input, final Mappers mappers,
+                             final ArrayNode output) {
+        this.mappers = mappers;
         this.input = input;
         this.output = output;
     }
     public void execute() {
-        User requestedUser = Execute.searchUser(input.getEmail(), users);
+        User requestedUser = mappers.getUserForEmail(input.getEmail());
         if (requestedUser == null) {
             throw new IllegalArgumentException("User not found");
         }
