@@ -1,32 +1,32 @@
-package org.poo.commands;
+package org.poo.commands.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jgrapht.*;
-import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
-import org.jgrapht.graph.*;
+import org.poo.commands.Command;
 import org.poo.execution.Execute;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
+import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
-
-import java.lang.reflect.Array;
 
 public class PayOnline implements Command {
     private final User[] users;
     private final CommandInput input;
     private final ArrayNode output;
     private final ExchangeGraph exchangeGraph;
+    private final Mappers mappers;
     public PayOnline(final CommandInput input, final User[] users,
                      final ExchangeGraph exchangeGraph,
-                     ArrayNode output) {
+                     final ArrayNode output,
+                     final Mappers mappers) {
         this.users = users;
         this.input = input;
         this.exchangeGraph = exchangeGraph;
         this.output = output;
+        this.mappers = mappers;
     }
 
     public void execute() {
@@ -77,7 +77,8 @@ public class PayOnline implements Command {
             objectNode.put("amount", convertedAmount);
             objectNode.put("commerciant", input.getCommerciant());
             requestedUser.getTransactions().add(objectNode);
-            requestedCard.subtractFromBalance(convertedAmount, requestedAccount);
+            requestedAccount.getTransactions().add(objectNode);
+            requestedCard.subtractFromBalance(convertedAmount, requestedAccount, mappers, input.getTimestamp());
         }
     }
 }

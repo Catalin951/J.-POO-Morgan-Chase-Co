@@ -1,8 +1,9 @@
-package org.poo.commands;
+package org.poo.commands.print;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.poo.commands.Command;
 import org.poo.fileio.CommandInput;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;

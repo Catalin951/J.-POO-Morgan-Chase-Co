@@ -1,16 +1,13 @@
-package org.poo.commands;
+package org.poo.commands.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultWeightedEdge;
-import org.poo.execution.Execute;
+import org.poo.commands.Command;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
-import org.poo.userDetails.card.Card;
 
 public class SendMoney implements Command {
     private final User[] users;
@@ -40,13 +37,7 @@ public class SendMoney implements Command {
                 break;
             }
         }
-//        if (requestedCard.isFrozen()) {
-//            ObjectNode errorNode = new ObjectMapper().createObjectNode();
-//            errorNode.put("description", "The card is frozen");
-//            errorNode.put("timestamp", input.getTimestamp());
-//            requestedUser.getTransactions().add(errorNode);
-//            return;
-//        }
+
         User receiver = null;
         Account receiverAccount = null;
         for (User user : users) {
@@ -94,6 +85,14 @@ public class SendMoney implements Command {
             objectNode.put("amount", input.getAmount() + " " + from);
             objectNode.put("transferType", "sent");
             payer.getTransactions().add(objectNode);
+
+            ObjectNode receiverNode = objectNode.deepCopy();
+            receiverNode.put("transferType", "received");
+            receiverNode.put("amount", convertedAmount + " " + to);
+            receiver.getTransactions().add(receiverNode);
+            receiverAccount.getTransactions().add(receiverNode);
+
+            payerAccount.getTransactions().add(objectNode);
             payerAccount.setBalance(payerAccount.getBalance() - input.getAmount());
             receiverAccount.setBalance(receiverAccount.getBalance() + convertedAmount);
         }

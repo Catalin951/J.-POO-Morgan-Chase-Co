@@ -13,4 +13,7 @@ public final class SavingsAccount extends Account {
     public void changeInterest(final double interestRate) {
         this.interestRate = interestRate;
     }
+    public double getInterest() {
+        return interestRate;
+    }
 }

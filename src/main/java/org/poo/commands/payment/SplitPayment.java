@@ -1,9 +1,9 @@
-package org.poo.commands;
+package org.poo.commands.payment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.poo.execution.Execute;
+import org.poo.commands.Command;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
 import org.poo.mapper.Mappers;
@@ -36,7 +36,7 @@ public class SplitPayment implements Command {
 
         for (String splittingIBAN : splittingIBANs) {
             involvedAccountsArray.add(splittingIBAN);
-            splittingAccounts.add(mappers.getAccountForIban(splittingIBAN));
+            splittingAccounts.addFirst(mappers.getAccountForIban(splittingIBAN));
         }
 
         if (splittingAccounts.size() != splittingIBANs.size()) {
@@ -48,7 +48,8 @@ public class SplitPayment implements Command {
         ObjectNode objectNode = new ObjectMapper().createObjectNode();
         objectNode.put("timestamp", input.getTimestamp());
         String formattedString = String.format("%.2f", input.getAmount()) + " " + input.getCurrency();
-        objectNode.put("description", "Split payment of " + formattedString);
+        String description = "Split payment of " + formattedString;
+        objectNode.put("description", description);
         objectNode.put("currency", input.getCurrency());
         objectNode.put("amount", splitAmount);
         objectNode.set("involvedAccounts", involvedAccountsArray);
@@ -56,9 +57,12 @@ public class SplitPayment implements Command {
         for (Account account : splittingAccounts) {
             String from = input.getCurrency();
             String to = account.getCurrency();
-            double convertedAmount = exchangeGraph.convertCurrency(from, to, splitAmount);
-            if (account.getBalance() < splitAmount) {
-                //do error for all accounts
+            double convertedAmount = splitAmount;
+            if (!from.equals(to)) {
+                convertedAmount = exchangeGraph.convertCurrency(from, to, splitAmount);
+            }
+            if (account.getBalance() < convertedAmount) {
+                addTransactionFailure(splittingAccounts, involvedAccountsArray, splitAmount, description, account.getIBAN());
                 return;
             }
             account.setBalance(account.getBalance() - convertedAmount);
@@ -68,6 +72,20 @@ public class SplitPayment implements Command {
         for (Account account : splittingAccounts) {
             User splittingUser = mappers.getUserForAccount(account);
             splittingUser.getTransactions().add(objectNode);
+        }
+    }
+    private void addTransactionFailure(ArrayList<Account> splittingAccounts, ArrayNode involvedAccountsArray, double splitAmount, String description, String IBAN) {
+        ObjectNode objectNode = new ObjectMapper().createObjectNode();
+        objectNode.put("timestamp", input.getTimestamp());
+        objectNode.put("description", description);
+        objectNode.put("currency", input.getCurrency());
+        objectNode.put("amount", splitAmount);
+        objectNode.set("involvedAccounts", involvedAccountsArray);
+        objectNode.put("error", "Account " + IBAN
+                + " has insufficient funds for a split payment.");
+        for (Account account : splittingAccounts) {
+            account.getTransactions().add(objectNode);
+            mappers.getUserForAccount(account).getTransactions().add(objectNode);
         }
     }
 }

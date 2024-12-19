@@ -1,13 +1,25 @@
 package org.poo.execution;
 
-import org.jgrapht.*;
-import org.jgrapht.graph.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.poo.commands.*;
+import org.poo.commands.create.CreateCard;
+import org.poo.commands.create.CreateOneTimeCard;
+import org.poo.commands.delete.DeleteAccount;
+import org.poo.commands.delete.DeleteCard;
+import org.poo.commands.interest.AddInterest;
+import org.poo.commands.interest.ChangeInterestRate;
+import org.poo.commands.payment.PayOnline;
+import org.poo.commands.payment.SendMoney;
+import org.poo.commands.payment.SplitPayment;
+import org.poo.commands.print.PrintTransactions;
+import org.poo.commands.print.PrintUsers;
+import org.poo.commands.SetAlias;
+import org.poo.commands.reports.Report;
+import org.poo.commands.reports.SpendingsReport;
 import org.poo.commerciants.CommerciantType;
 import org.poo.exchange.Exchange;
-import org.poo.factories.AccountFactory;
 import org.poo.fileio.CommandInput;
 import org.poo.graph.ExchangeGraph;
 import org.poo.mapper.Mappers;
@@ -16,7 +28,6 @@ import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.Card;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public final class Execute {
     private final ArrayNode output;
@@ -60,13 +71,13 @@ public final class Execute {
                     new CreateOneTimeCard(command, mappers).execute();
                     break;
                 case "deleteAccount":
-                    new DeleteAccount(command, users, output).execute();
+                    new DeleteAccount(command, output, mappers).execute();
                     break;
                 case "deleteCard":
-                    new DeleteCard(command, users).execute();
+                    new DeleteCard(command, users, mappers).execute();
                     break;
                 case "payOnline":
-                    new PayOnline(command, users, exchangeGraph, output).execute();
+                    new PayOnline(command, users, exchangeGraph, output, mappers).execute();
                     break;
                 case "sendMoney":
                     new SendMoney(command, users, exchangeGraph, output).execute();
@@ -81,15 +92,35 @@ public final class Execute {
                     new CheckCardStatus(command, users, output).execute();
                     break;
                 case "changeInterestRate":
-                    new ChangeInterestRate(command, users, output).execute();
+                    new ChangeInterestRate(command, mappers, output).execute();
                     break;
                 case "splitPayment":
                     new SplitPayment(command, users, exchangeGraph, output, mappers).execute();
+                    break;
+                case "addInterest":
+                    new AddInterest(command, output, mappers).execute();
+                    break;
+                case "report":
+                    new Report(command, output, mappers).execute();
+                    break;
+                case "spendingsReport":
+                    new SpendingsReport(command, output, mappers).execute();
                     break;
                 default:
                     break;
             }
         }
+    }
+    public static ObjectNode makeGeneralError(String command, String description, int timestamp) {
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode outputNode = mapper.createObjectNode();
+        outputNode.put("description", description);
+        outputNode.put("timestamp", timestamp);
+        ObjectNode errorNode = mapper.createObjectNode();
+        errorNode.put("command", command);
+        errorNode.set("output", outputNode);
+        errorNode.put("timestamp", timestamp);
+        return errorNode;
     }
     public static User searchUser(final String email, final User[] users) {
         User requestedUser = null;

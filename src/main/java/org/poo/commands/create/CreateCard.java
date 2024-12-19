@@ -1,20 +1,19 @@
-package org.poo.commands;
+package org.poo.commands.create;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import org.poo.execution.Execute;
+import org.poo.commands.Command;
 import org.poo.fileio.CommandInput;
 import org.poo.mapper.Mappers;
 import org.poo.userDetails.User;
 import org.poo.userDetails.account.Account;
 import org.poo.userDetails.card.ClassicCard;
-import org.poo.userDetails.card.OneTimeCard;
 import org.poo.utils.Utils;
 
-public final class CreateOneTimeCard implements Command {
+public final class CreateCard implements Command {
     private final CommandInput input;
     private final Mappers mappers;
-    public CreateOneTimeCard(final CommandInput input, final Mappers mappers) {
+    public CreateCard(final CommandInput input, final Mappers mappers) {
         this.input = input;
         this.mappers = mappers;
     }
@@ -43,7 +42,7 @@ public final class CreateOneTimeCard implements Command {
         requestedUser.getTransactions().add(objectNode);
         account.getTransactions().add(objectNode);
 
-        OneTimeCard newCard = new OneTimeCard(cardNumber);
+        ClassicCard newCard = new ClassicCard(cardNumber);
         account.getCards().addLast(newCard);
 
         mappers.addCardToAccount(newCard, account);

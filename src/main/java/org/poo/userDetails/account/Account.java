@@ -33,4 +33,5 @@ public abstract class Account {
     }
     public abstract String getAccountType();
     public abstract void changeInterest(double interest);
+    public abstract double getInterest();
 }

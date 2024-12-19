@@ -32,6 +32,7 @@ public final class AddAccount implements Command {
         objectNode.put("timestamp", input.getTimestamp());
         objectNode.put("description", "New account created");
 
+        newAccount.getTransactions().add(objectNode);
         requestedUser.getTransactions().add(objectNode);
         requestedUser.getAccounts().addLast(newAccount);
     }

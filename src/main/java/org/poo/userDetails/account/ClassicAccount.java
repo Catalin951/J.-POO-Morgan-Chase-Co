@@ -8,4 +8,7 @@ public final class ClassicAccount extends Account {
         return "classic";
     }
     public void changeInterest(final double interest) {}
+    public double getInterest() {
+        return 0;
+    }
 }
