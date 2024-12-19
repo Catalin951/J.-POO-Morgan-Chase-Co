@@ -33,14 +33,12 @@ public final class Execute {
     private final ArrayNode output;
     private final User[] users;
     private final Exchange[] exchanges;
-    private final ArrayList<CommerciantType> commerciantTypes;
     private final CommandInput[] commands;
 
     public Execute(final ArrayNode output, final User[] users, final Exchange[] exchanges, final CommandInput[] commands) {
         this.output = output;
         this.users = users;
         this.exchanges = exchanges;
-        this.commerciantTypes = new ArrayList<>();
         this.commands = commands;
     }
 

@@ -54,6 +54,8 @@ public class SplitPayment implements Command {
         objectNode.put("amount", splitAmount);
         objectNode.set("involvedAccounts", involvedAccountsArray);
 
+        ArrayList<Double> newBalances = new ArrayList<>();
+
         for (Account account : splittingAccounts) {
             String from = input.getCurrency();
             String to = account.getCurrency();
@@ -65,13 +67,14 @@ public class SplitPayment implements Command {
                 addTransactionFailure(splittingAccounts, involvedAccountsArray, splitAmount, description, account.getIBAN());
                 return;
             }
-            account.setBalance(account.getBalance() - convertedAmount);
-            User splittingUser = mappers.getUserForAccount(account);
-//            splittingUser.getTransactions()
+            newBalances.add(account.getBalance() - convertedAmount);
         }
+        int i = 0;
         for (Account account : splittingAccounts) {
+            account.setBalance(newBalances.get(i));
             User splittingUser = mappers.getUserForAccount(account);
             splittingUser.getTransactions().add(objectNode);
+            i++;
         }
     }
     private void addTransactionFailure(ArrayList<Account> splittingAccounts, ArrayNode involvedAccountsArray, double splitAmount, String description, String IBAN) {

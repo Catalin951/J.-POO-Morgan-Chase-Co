@@ -62,10 +62,6 @@ public class SendMoney implements Command {
             System.out.println("the account " + input.getAccount() + " not found SENDMONEY" + input.getTimestamp());
             return;
         }
-        if (payerAccount == null || receiverAccount == null) {
-            System.out.printf("the account %s not found SENDMONEY", input.getAccount());
-            return;
-        }
         String from = payerAccount.getCurrency();
         String to = receiverAccount.getCurrency();
         double convertedAmount = input.getAmount();
@@ -77,6 +73,7 @@ public class SendMoney implements Command {
             objectNode.put("timestamp", input.getTimestamp());
             objectNode.put("description", "Insufficient funds");
             payer.getTransactions().add(objectNode);
+            payerAccount.getTransactions().add(objectNode);
         } else {
             objectNode.put("timestamp", input.getTimestamp());
             objectNode.put("description", input.getDescription());
